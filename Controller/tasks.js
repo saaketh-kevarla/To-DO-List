@@ -25,21 +25,47 @@ catch(error){
 const getTask = async(req,res) =>{
     try{
         const thatTask = await Task.findOne({_id: req.params.id})
+        if(!thatTask){
+            return res.status(404).json({msg:`This id ${req.params.id} doesnt exist`});
+        }
         res.status(200).json(thatTask)
     }
     catch(error){
-        console.log('Error couldnt fetch the task',error);
-        
+        res.status(500).json({msg : error}); 
     }
 
 }
 
-const updateTask = (req,res) =>{
-    res.send('Update Task')
+const updateTask = async (req,res) =>{
+    try {
+        const {id:TaskID} = req.params;
+        const thatTask  = await Task.findByIdAndUpdate(TaskID,req.body,{
+            new : true,
+            runValidators : true
+        });
+        if(!thatTask){
+            res.status(404).json({msg : error})
+        }
+        //const allTasks = await Task.find({});
+        res.status(201).json(thatTask);
+
+    } catch (error) {
+        res.status(500).json({msg : error})
+    }
 }
 
-const deleteTask = (req,res) =>{
-    res.send('Delete Task')
+const deleteTask = async (req,res) =>{
+    try {
+        const {id:TaskID} = req.params
+        const delTask = await Task.deleteOne({_id : TaskID})
+        const allTasks = await Task.find({});
+        if(!delTask){
+            return res.status(404).json({msg : `cannot find the task with id ${TaskID}`})
+        }
+        res.status(201).json(allTasks);
+    } catch (error) {
+        res.status(500).json({msg : error});    
+    }
 }
 
 
